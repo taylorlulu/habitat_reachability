@@ -1,0 +1,345 @@
+config=ENV_NAME: RearrangeRLEnv-v0
+RL:
+  ACTION_NAME: BaseArmGripperAction
+  REWARD_MEASURES: []
+  SLACK_REWARD: 0.0
+  SUCCESS_MEASURE:
+  SUCCESS_REWARD: 0.0
+TASK_CONFIG:
+  DATASET:
+    CONTENT_SCENES: ['*']
+    DATA_PATH: data/datasets/rearrange/v3/tidy_house_220417_{split}.json.gz
+    EPISODE_IDS: []
+    NUM_EPISODES: -1
+    SCENES_DIR:
+    SPLIT: train
+    TYPE: RearrangeDataset-v0
+  ENVIRONMENT:
+    ITERATOR_OPTIONS:
+      CYCLE: True
+      GROUP_BY_SCENE: True
+      MAX_SCENE_REPEAT_EPISODES: -1
+      MAX_SCENE_REPEAT_STEPS: -1
+      NUM_EPISODE_SAMPLE: -1
+      SHUFFLE: True
+      STEP_REPETITION_RANGE: 0.2
+    MAX_EPISODE_SECONDS: 10000000
+    MAX_EPISODE_STEPS: 200
+  SEED: 100
+  SIMULATOR:
+    ACTION_SPACE_CONFIG: v0
+    AGENTS: ['AGENT_0']
+    AGENT_0:
+      HEIGHT: 1.5
+      IS_SET_START_STATE: False
+      RADIUS: 0.3
+      SENSORS: ['HEAD_RGB_SENSOR', 'HEAD_DEPTH_SENSOR', 'ARM_RGB_SENSOR', 'ARM_DEPTH_SENSOR', 'THIRD_RGB_SENSOR']
+      START_POSITION: [0, 0, 0]
+      START_ROTATION: [0, 0, 0, 1]
+    ARM_DEPTH_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      MAX_DEPTH: 10.0
+      MIN_DEPTH: 0.0
+      NORMALIZE_DEPTH: True
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimDepthSensor
+      UUID: robot_arm_depth
+      WIDTH: 128
+    ARM_RGB_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimRGBSensor
+      UUID: robot_arm_rgb
+      WIDTH: 128
+    ARM_SEMANTIC_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimSemanticSensor
+      UUID: robot_arm_semantic
+      WIDTH: 128
+    CONTROL_FREQ: 4
+    DEFAULT_AGENT_ID: 0
+    DEPTH_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      MAX_DEPTH: 10.0
+      MIN_DEPTH: 0.0
+      NORMALIZE_DEPTH: True
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimDepthSensor
+      WIDTH: 128
+    FETCH_ROBOT:
+      PARAMS:
+
+      TYPE: hab_fetch
+    FORWARD_STEP_SIZE: 0.25
+    HABITAT_SIM_V0:
+      ALLOW_SLIDING: True
+      ENABLE_PHYSICS: True
+      GPU_DEVICE_ID: 0
+      GPU_GPU: False
+      PHYSICS_CONFIG_FILE: ./data/default.physics_config.json
+    HEAD_DEPTH_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      MAX_DEPTH: 10.0
+      MIN_DEPTH: 0.0
+      NORMALIZE_DEPTH: True
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimDepthSensor
+      UUID: robot_head_depth
+      WIDTH: 128
+    HEAD_RGB_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimRGBSensor
+      UUID: robot_head_rgb
+      WIDTH: 128
+    HEAD_SEMANTIC_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimSemanticSensor
+      UUID: robot_head_semantic
+      WIDTH: 128
+    RGB_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimRGBSensor
+      WIDTH: 128
+    SCENE:
+    SCENE_DATASET: data/replica_cad/replicaCAD.scene_dataset_config.json
+    SEED: 100
+    SEMANTIC_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimSemanticSensor
+      WIDTH: 128
+    SIM_FREQ: 120
+    THIRD_DEPTH_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      MAX_DEPTH: 10.0
+      MIN_DEPTH: 0.0
+      NORMALIZE_DEPTH: True
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimDepthSensor
+      UUID: robot_third_depth
+      WIDTH: 128
+    THIRD_RGB_SENSOR:
+      HEIGHT: 512
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimRGBSensor
+      UUID: robot_third_rgb
+      WIDTH: 512
+    THIRD_SEMANTIC_SENSOR:
+      HEIGHT: 128
+      HFOV: 90
+      ORIENTATION: [0.0, 0.0, 0.0]
+      POSITION: [0, 1.25, 0]
+      SENSOR_SUBTYPE: PINHOLE
+      TYPE: HabitatSimSemanticSensor
+      UUID: robot_third_semantic
+      WIDTH: 128
+    TILT_ANGLE: 15
+    TURN_ANGLE: 10
+    TYPE: RearrangeSim-v0
+    VERBOSE: False
+  TASK:
+    ACTIONS:
+      ArmGripperAction:
+        ARM_ACTION:
+          CTRL_SCALE: 0.015
+          TYPE: ArmEEAction
+        GRIPPER_ACTION:
+          DISABLE_RELEASE: True
+          THRESHOLD: 0.15
+          TYPE: MagicGraspAction
+        TYPE: ArmGripperAction
+      ArmGripperAction2:
+        ARM_ACTION:
+          CTRL_SCALE: 0.025
+          TYPE: ArmRelPosAction
+        GRIPPER_ACTION:
+          DISABLE_RELEASE: True
+          THRESHOLD: 0.15
+          TYPE: MagicGraspAction
+        TYPE: ArmGripperAction
+      BaseArmGripperAction:
+        ARM_ACTION:
+          CTRL_SCALE: 0.015
+          TYPE: ArmEEAction
+        BASE_ACTION:
+          ANG_SCALE: 1.5
+          LIN_SCALE: 1.5
+          TYPE: BaseVelAction
+          UPDATE_GRASP: True
+        GRIPPER_ACTION:
+          DISABLE_RELEASE: True
+          THRESHOLD: 0.15
+          TYPE: MagicGraspAction
+        TYPE: BaseArmGripperAction
+      BaseArmGripperAction2:
+        ARM_ACTION:
+          CTRL_SCALE: 0.025
+          TYPE: ArmRelPosAction
+        BASE_ACTION:
+          ANG_SCALE: 1.5
+          LIN_SCALE: 1.5
+          TYPE: BaseVelAction
+          UPDATE_GRASP: True
+        GRIPPER_ACTION:
+          DISABLE_RELEASE: True
+          THRESHOLD: 0.15
+          TYPE: MagicGraspAction
+        TYPE: BaseArmGripperAction
+      BaseDiscVelAction:
+        ANG_SCALE: 3.0
+        END_ON_STOP: True
+        LIN_SCALE: 3.0
+        TYPE: BaseDiscVelAction
+        UPDATE_GRASP: True
+      BaseVelAction:
+        ANG_SCALE: 3.0
+        LIN_SCALE: 3.0
+        TYPE: BaseVelAction
+        UPDATE_GRASP: True
+      BaseVelAction2:
+        ANG_SCALE: 3.0
+        END_ON_STOP: True
+        LIN_SCALE: 3.0
+        TYPE: BaseVelStopAction
+        UPDATE_GRASP: True
+      EmptyAction:
+        TYPE: EmptyAction
+    ArmJointPositionSensor:
+      TYPE: ArmJointPositionSensor
+    ArmJointVelocitySensor:
+      TYPE: ArmJointVelocitySensor
+    BASE_ANGLE_NOISE: 0.25
+    BASE_NOISE: 0.1
+    BaseHeadingSensor:
+      EPISODIC: True
+      TYPE: BaseHeadingSensor
+      UUID: base_heading_at_episode
+    BasePositionSensor:
+      FRAME: start_base
+      TYPE: BasePositionSensor
+      UUID: base_pos_at_episode
+    DRAWER_INIT_RANGE: [0.4, 0.5]
+    FRIDGE_INIT_RANGE: [1.5, 2.35]
+    ForcePenalty:
+      FORCE_PENALTY: 0.001
+      MAX_ACCUM_FORCE: 5000.0
+      MAX_ACCUM_FORCE_PENALTY: 1.0
+      MAX_FORCE_PENALTY: 0.2
+      TYPE: ForcePenalty
+    GripperPositionSensor:
+      FRAME: base
+      TYPE: GripperPositionSensor
+      UUID: gripper_pos_at_base
+    GripperStatus:
+      TYPE: GripperStatus
+    GripperToObjectDistance:
+      TYPE: GripperToObjectDistance
+    GripperToRestingDistance:
+      TYPE: GripperToRestingDistance
+    InvalidGrasp:
+      TYPE: InvalidGrasp
+    InvalidGraspPenalty:
+      END_EPISODE: True
+      PENALTY: 1.0
+      TYPE: InvalidGraspPenalty
+    IsGraspedSensor:
+      TYPE: IsGraspedSensor
+    MAX_REGION_SIZE: 2.0
+    MEASUREMENTS: ['GripperToObjectDistance', 'GripperToRestingDistance', 'GripperStatus', 'RobotForce', 'ForcePenalty', 'InvalidGraspPenalty', 'RearrangePickSuccess', 'RearrangePickReward']
+    NavGoalSensor:
+      FRAME: base
+      TYPE: NavGoalSensor
+      UUID: nav_goal_at_base
+    OBJ_INIT_NOISE: 1.0
+    POSSIBLE_ACTIONS: ['BaseArmGripperAction', 'BaseArmGripperAction2']
+    PickGoalSensor:
+      FRAME: gripper
+      TYPE: PickGoalSensor
+      UUID: pick_goal_at_gripper
+    PickGoalSensor2:
+      FRAME: base
+      TYPE: PickGoalSensor
+      UUID: pick_goal_at_base
+    PlaceGoalSensor:
+      FRAME: gripper
+      TYPE: PlaceGoalSensor
+      UUID: place_goal_at_gripper
+    PlaceGoalSensor2:
+      FRAME: base
+      TYPE: PlaceGoalSensor
+      UUID: place_goal_at_base
+    RearrangePickReward:
+      DIST_REWARD: 4.0
+      DROP_PENALTY: 1.0
+      PICK_PENALTY: 1.0
+      PICK_REWARD: 1.0
+      TYPE: RearrangePickReward
+      USE_DIFF: True
+    RearrangePickSuccess:
+      THRESHOLD: 0.05
+      TYPE: RearrangePickSuccess
+    RestingPositionSensor:
+      FRAME: base
+      TYPE: RestingPositionSensor
+      UUID: resting_pos_at_base
+    RobotForce:
+      INCLUDE_OBJ_COLLISIONS: True
+      MIN_DELTA_FORCE: 20.0
+      TYPE: RobotForce
+    SENSORS: ['ArmJointPositionSensor', 'GripperPositionSensor', 'IsGraspedSensor', 'PickGoalSensor', 'PickGoalSensor2']
+    START_REGION_SIZE: 2.0
+    TOP_DOWN_MAP:
+      DRAW_BORDER: True
+      DRAW_GOAL_AABBS: True
+      DRAW_GOAL_POSITIONS: True
+      DRAW_SHORTEST_PATH: True
+      DRAW_SOURCE: True
+      DRAW_VIEW_POINTS: True
+      FOG_OF_WAR:
+        DRAW: True
+        FOV: 90
+        VISIBILITY_DIST: 5.0
+      MAP_PADDING: 3
+      MAP_RESOLUTION: 1024
+      MAX_EPISODE_STEPS: 1000
+      TYPE: TopDownMap
+    TYPE: RearrangePickTask-v1
+    USE_BAKED_SCENES: False
+    USE_CACHE: False
