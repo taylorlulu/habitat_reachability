@@ -106,6 +106,8 @@ Or use a specific RL config:
 
 ```bash
 python habitat_extensions/tasks/rearrange/play.py  --cfg configs/rearrange/skills/tidy_house/pick_v1_joint_SCR.yaml
+
+python habitat_extensions/tasks/rearrange/play.py  --cfg configs/rearrange/skills/tidy_house/nav_v2_disc_SCR.yaml
 ```
 
 ## Evaluation
@@ -117,6 +119,13 @@ python habitat_extensions/tasks/rearrange/play.py  --cfg configs/rearrange/skill
 python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/pick_v1_joint_SCR.yaml --run-type eval
 # Evaluate the latest checkpoint of a skill saved at "data/results/rearrange/skills/tidy_house/pick_v1_joint_SCR/seed=100"
 python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/pick_v1_joint_SCR.yaml --run-type eval --run-type eval PREFIX seed=100
+
+python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/nav_v4_disc_SCR.yaml --run-type eval --run-type eval PREFIX seed=100
+
+python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/nav_v3_disc_SCR.yaml --run-type eval --run-type eval PREFIX seed=100
+
+python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/nav_v2_disc_SCR.yaml --run-type eval --run-type eval PREFIX seed=100
+
 ```
 
 Pretrained skills can be downloaded [here](https://drive.google.com/drive/folders/1u7DAd25PE818wjg-MxDKJ7y5n8GQtfrz?usp=sharing).
@@ -168,3 +177,13 @@ python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/
 ## Acknowledgments
 
 This repository is inspired by [Habitat Lab](https://github.com/facebookresearch/habitat-lab) for RL environments and PPO implementation. We would also like to thank [Andrew Szot](https://www.andrewszot.com/) and [Alexander Clegg](https://scholar.google.com/citations?user=p463opcAAAAJ&hl=en) for their help in using Habitat 2.0.
+
+Problems:
+一直出现
+File "/home/lu/.conda/envs/hab-mm/lib/python3.7/multiprocessing/connection.py", line 368, in _send
+    n = write(self._handle, buf)
+BrokenPipeError: [Errno 32] Broken pipe
+问题，发现是由于
+>print(inspect.getfile(habitat_baselines))
+/home/lu/Desktop/embodied_ai/hab-mobile-manipulation/habitat-lab/habitat_baselines/__init__.py
+导致的

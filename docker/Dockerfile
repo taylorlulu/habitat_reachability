@@ -1,4 +1,4 @@
-FROM nvidia/cudagl:10.2-devel-ubuntu18.04
+FROM nvidia/cudagl:11.0-devel-ubuntu20.04
 
 # https://github.com/facebookresearch/habitat-lab/blob/main/Dockerfile
 # Setup basic packages

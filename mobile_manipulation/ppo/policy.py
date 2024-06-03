@@ -10,7 +10,7 @@ from habitat_baselines.utils.common import CustomFixedCategorical, CustomNormal
 from torch.distributions import Distribution
 
 from mobile_manipulation.utils.nn_utils import MLP
-
+from habitat_extensions.utils.net_utils import CriticNetwork, ActorNetwork
 
 class Net(nn.Module):
     """Base class for backbone to extract features."""
@@ -122,6 +122,7 @@ class ActorCritic(nn.Module):
 
     def __init__(self, net: Net, actor: nn.Module, critic: nn.Module):
         super().__init__()
+        # 这里的网络就是cnn_policy中的网络
         self.net = net
         self.actor = actor
         self.critic = critic
@@ -159,14 +160,23 @@ class ActorCritic(nn.Module):
     def evaluate_actions(
         self, batch: Dict[str, torch.Tensor], action: torch.Tensor
     ):
+        # 这里的net为cnn_policy，其实是经过了一个RNN网络的结果
         net_outputs: Dict[str, torch.Tensor] = self.net(batch)
         features = net_outputs["features"]
         rnn_hidden_states = net_outputs["rnn_hidden_states"]
 
+        # print("features.shape=%s"%(str(features.shape)))
+        # print("rnn_hidden_states.shape=%s"%(str(rnn_hidden_states.shape)))
+
+        # distribution的维度为
         distribution: Distribution = self.actor(features)
+
+        # value的维度为torch.Size([4096, 1])
         value: torch.Tensor = self.critic(features)
 
+        # 维度为[4096, 1]
         action_log_probs = distribution.log_probs(action)  # [B, 1]
+        # 维度为[4096, 1]
         dist_entropy = distribution.entropy()  # [B, 1]
 
         return dict(

@@ -43,3 +43,27 @@ class MLP(nn.ModuleList):
                 torch.nn.init.orthogonal_(m.weight, gain=gain)
                 torch.nn.init.zeros_(m.bias)
         return self
+
+class MLP_flatten(nn.ModuleList):
+    def __init__(self, c_in: int, c_outs: Sequence[int]):
+        super().__init__()
+        for c_out in c_outs:
+            self.append(nn.Linear(c_in, c_out))
+            self.append(nn.ReLU(inplace=True))
+            c_in = c_out
+        self.output_size = c_in
+
+    def forward(self, x):
+        for m in self:
+            x = m(x)
+        # 在最后一层之后添加flatten操作
+        x = torch.flatten(x, start_dim=1)
+        x = self[-1](x)  # 最后一层不使用ReLU激活函数
+        return x
+
+    def orthogonal_(self, gain=math.sqrt(2)):
+        for m in self.modules():
+            if isinstance(m, torch.nn.Linear):
+                torch.nn.init.orthogonal_(m.weight, gain=gain)
+                torch.nn.init.zeros_(m.bias)
+        return self

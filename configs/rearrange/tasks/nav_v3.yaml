@@ -1,0 +1,46 @@
+__BASE__: "{fileDirname}/nav_v0.yaml"
+
+# 这个版本是将(x, y)信息加入奖励函数，奖励函数同时位置和方向
+TASK:
+  TYPE: RearrangeNavTask-v1
+
+  SENSORS:
+    - NavGoalSensor # 位于nav_to_obj_sensors.py中
+
+  # 定义所有用到的衡量指标
+  # 不一定其中的所有部分都用到RL的奖励函数中去
+  # 这里的nav_v1和nav_v0是一个继承关系
+  MEASUREMENTS:
+    - GeoDistanceToNavGoals
+    - AngDistanceToGoal
+    - RearrangeNavSuccess
+    - RearrangeNavRewardV1
+    - RobotForce
+    - ForcePenalty
+
+  GeoDistanceToNavGoals:
+    UUID: "geo_dist_to_nav_goal"
+    TYPE: GeoDistanceToNavGoalsV1
+    MIN_DIST: 0.05
+  AngDistanceToGoal:
+    UUID: "ang_dist_to_nav_goal"
+    TYPE: AngDistanceToGoalV1
+  RearrangeNavSuccess:
+    TYPE: RearrangeNavSuccess
+    GEO_THRESHOLD: 0.1
+    ANG_THRESHOLD: 0.25
+  RearrangeNavRewardV1:
+    TYPE: RearrangeNavRewardV3
+    GEO_DIST_REWARD: 1.0
+    ANG_DIST_REWARD: 0.0
+    ANG_REWARD_THRESH: -1.0
+  RobotForce:
+    TYPE: RobotForce
+    MIN_DELTA_FORCE: 20.0
+    INCLUDE_OBJ_COLLISIONS: True
+  ForcePenalty:
+    TYPE: ForcePenalty
+    FORCE_PENALTY: 0.001
+    MAX_FORCE_PENALTY: 0.2
+    MAX_ACCUM_FORCE: -1.0
+    MAX_ACCUM_FORCE_PENALTY: 1.0

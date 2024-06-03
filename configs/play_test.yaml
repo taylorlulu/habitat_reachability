@@ -1,19 +1,26 @@
 config=ENV_NAME: RearrangeRLEnv-v0
+
+# 定义RL训练的相关参数
 RL:
   ACTION_NAME: BaseArmGripperAction
   REWARD_MEASURES: []
   SLACK_REWARD: 0.0
   SUCCESS_MEASURE:
   SUCCESS_REWARD: 0.0
+
+# 定义任务的相关参数
 TASK_CONFIG:
+  # 定义数据集相关参数
   DATASET:
     CONTENT_SCENES: ['*']
+    # The dataset to use. Later we will generate our own dataset.
     DATA_PATH: data/datasets/rearrange/v3/tidy_house_220417_{split}.json.gz
     EPISODE_IDS: []
     NUM_EPISODES: -1
     SCENES_DIR:
     SPLIT: train
     TYPE: RearrangeDataset-v0
+  # 定义环境相关参数
   ENVIRONMENT:
     ITERATOR_OPTIONS:
       CYCLE: True
@@ -25,7 +32,9 @@ TASK_CONFIG:
       STEP_REPETITION_RANGE: 0.2
     MAX_EPISODE_SECONDS: 10000000
     MAX_EPISODE_STEPS: 200
+  # 种子参数
   SEED: 100
+  # 模拟器参数
   SIMULATOR:
     ACTION_SPACE_CONFIG: v0
     AGENTS: ['AGENT_0']
@@ -174,7 +183,10 @@ TASK_CONFIG:
     TURN_ANGLE: 10
     TYPE: RearrangeSim-v0
     VERBOSE: False
+  # 定义任务相关参数
   TASK:
+    # 动作
+    # Define the action space.
     ACTIONS:
       ArmGripperAction:
         ARM_ACTION:
@@ -282,6 +294,8 @@ TASK_CONFIG:
     IsGraspedSensor:
       TYPE: IsGraspedSensor
     MAX_REGION_SIZE: 2.0
+    # 衡量指标
+    # The measurements returned in the info dictionary
     MEASUREMENTS: ['GripperToObjectDistance', 'GripperToRestingDistance', 'GripperStatus', 'RobotForce', 'ForcePenalty', 'InvalidGraspPenalty', 'RearrangePickSuccess', 'RearrangePickReward']
     NavGoalSensor:
       FRAME: base
@@ -323,6 +337,7 @@ TASK_CONFIG:
       INCLUDE_OBJ_COLLISIONS: True
       MIN_DELTA_FORCE: 20.0
       TYPE: RobotForce
+    # TODO: 这部分是采用的传感器
     SENSORS: ['ArmJointPositionSensor', 'GripperPositionSensor', 'IsGraspedSensor', 'PickGoalSensor', 'PickGoalSensor2']
     START_REGION_SIZE: 2.0
     TOP_DOWN_MAP:

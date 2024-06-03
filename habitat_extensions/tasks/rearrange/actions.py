@@ -247,9 +247,9 @@ class BaseVelAction(AtomicAction):
 
     def __init__(self, *args, config, sim, **kwargs):
         super().__init__(*args, config=config, sim=sim, **kwargs)
-
+        # 赋值了一个robot对象
         self._robot = self._sim.robot
-
+        # 创建了速度控制对象
         self.vel_ctrl = habitat_sim.physics.VelocityControl()
         self.vel_ctrl.controlling_lin_vel = True
         self.vel_ctrl.lin_vel_is_local = True
@@ -258,9 +258,12 @@ class BaseVelAction(AtomicAction):
 
     @property
     def action_space(self):
+        # 定义了动作空间，动作空间是一个二维的 Box 空间，范围在 -1 到 1 之间
+        # 可以参考play.py中的BaseVelAction的动作空间定义
         return spaces.Box(shape=(2,), low=-1, high=1, dtype=np.float32)
 
     def preprocess_velocity(self, velocity):
+        # 预处理输入的速度，对速度进行归一化处理，将速度限制在[-1, 1]的范围内
         lin_vel, ang_vel = velocity
 
         # normalize
@@ -272,13 +275,16 @@ class BaseVelAction(AtomicAction):
         lin_vel = np.clip(lin_vel, -1, 1)
         ang_vel = np.clip(ang_vel, -1, 1)
 
+        # 如果配置中有禁止后对，则将后对速度乘以0.5，以减少后退运动的幅度
         if self._config.get("DISABLE_BACKWARD", False):
             lin_vel = lin_vel * 0.5 + 0.5
 
+        # 将速度乘以线速度和角速度的比例因子
         lin_vel = lin_vel * self._config.LIN_SCALE
         ang_vel = ang_vel * self._config.ANG_SCALE
         return lin_vel, ang_vel
 
+    # 运行动作的部分
     def _step(self, velocity, *args, **kwargs):
         """Move the robot base according to navmesh.
 
@@ -286,17 +292,21 @@ class BaseVelAction(AtomicAction):
             - Stop when velocity is small
             - Revert robot pose if it collides with other objects.
         """
+        # 预处理输入速度
         lin_vel, ang_vel = self.preprocess_velocity(velocity)
 
+        # 设置对象的线速度和角速度，在这里设置了速度
         # x-axis is forward and y-axis is up.
         self.vel_ctrl.linear_velocity = mn.Vector3(lin_vel, 0, 0)
         self.vel_ctrl.angular_velocity = mn.Vector3(0, ang_vel, 0)
 
+        # 计算机器人基座的变换以及目标基座的变换
         # Compute current and target base transformation
         base_T = self._robot.base_T
         rigid_state = habitat_sim.RigidState(
             mn.Quaternion.from_matrix(base_T.rotation()), base_T.translation
         )
+        # 要用过滤器的原因是怕最终的位置在地图之外
         target_rigid_state = self.vel_ctrl.integrate_transform(
             self._sim.timestep, rigid_state
         )
@@ -311,8 +321,10 @@ class BaseVelAction(AtomicAction):
         target_T = mn.Matrix4.from_(
             target_rigid_state.rotation.to_matrix(), target_position
         )
+        # 更新机器人当前的位置
         self._robot.base_T = target_T
 
+        # 如果配置中设置了更新抓取物体（UPDATE_GRASP），并且机器人当前正在抓取物体，则更新抓取物体的位置
         # Update the grasped object
         grasped_obj = self._sim.gripper.grasped_obj
         if self._config.get("UPDATE_GRASP", False) and grasped_obj is not None:
@@ -320,6 +332,7 @@ class BaseVelAction(AtomicAction):
             rel_T = target_T @ base_T.inverted()
             grasped_obj.transformation = rel_T @ grapsed_obj_T
 
+    # 返回字典，值为输入动作的速度
     def get_action_args(self, action: np.ndarray):
         return {"velocity": action}
 
@@ -338,6 +351,7 @@ class BaseDiscVelAction(BaseVelAction):
 
     @property
     def action_space(self):
+        # 输入其实是一个选择[lin_vel, ang_vel]的索引值
         return spaces.Discrete(4 * 5)
 
     def reset(self, *args, **kwargs):
@@ -380,7 +394,7 @@ class BaseVelStopAction(BaseVelAction):
 
 
 # -------------------------------------------------------------------------- #
-# Base + Arm + Gripper
+# Base + Arm + Gripper，这个部分就是作者提出的改进即同时运动Base、Arm和Gripper
 # -------------------------------------------------------------------------- #
 @registry.register_task_action
 class BaseArmGripperAction(SimulatorTaskAction):

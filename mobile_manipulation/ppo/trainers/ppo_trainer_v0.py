@@ -42,6 +42,7 @@ from mobile_manipulation.utils.env_utils import (
     make_env_fn,
 )
 from mobile_manipulation.utils.wrappers import HabitatActionWrapper
+from habitat_extensions.utils.net_utils import CriticNetwork, ActorNetwork
 
 
 @baseline_registry.register_trainer(name="ppo-v0")
@@ -84,7 +85,12 @@ class PPOTrainerV0(BaseTrainer):
             )
 
         while not self.is_done():
+            # Todo:在这部分进行每一轮的训练
             # Rollout and collect transitions
+            # Rollout and collect transitions
+            print("================当前为第%d轮训练===============" % (self.num_steps_done))
+            logger.info("================当前为第%d轮训练===============" % (self.num_steps_done))
+
             self.actor_critic.eval()
             for _ in range(ppo_cfg.num_steps):
                 self.step()
@@ -94,7 +100,7 @@ class PPOTrainerV0(BaseTrainer):
                 losses, metrics = self.update()
                 self.rollouts.after_update()
 
-            # Logging
+            # Logging，经过10轮进行一次训练，修改成没经过1轮
             episode_metrics = self.get_episode_metrics()
             if self.num_updates_done % self.config.LOG_INTERVAL == 0:
                 self.log(episode_metrics)
@@ -102,8 +108,8 @@ class PPOTrainerV0(BaseTrainer):
             # Tensorboard
             metrics.update(**episode_metrics)
             metrics["lr"] = self.optimizer.param_groups[0]["lr"]
-            if self.should_summarize():
-                self.summarize(losses, metrics)
+            # if self.should_summarize():
+            self.summarize(losses, metrics)
             if self.should_summarize(10):
                 self.summarize2()
 
@@ -112,6 +118,7 @@ class PPOTrainerV0(BaseTrainer):
                 self.count_checkpoints += 1
                 self.prev_ckpt_step = self.num_steps_done
                 self.save(ckpt_id=self.count_checkpoints)
+
             if self.should_checkpoint2():
                 self.save(ckpt_id=-1)
 
@@ -274,11 +281,15 @@ class PPOTrainerV0(BaseTrainer):
                 )
 
             for batch in data_generator:
+                print("batch=%s"%(str(batch)))
                 outputs = self.actor_critic.evaluate_actions(
                     batch, batch["actions"]
                 )
+                # 数据维度为[4096, 1]
                 values = outputs["value"]  # [B, 1]
+                # 数据维度为[4096, 1]
                 action_log_probs = outputs["action_log_probs"]  # [B, 1]
+                # 数据维度为4096
                 dist_entropy = outputs["dist_entropy"]  # [B, A]
 
                 ratio = torch.exp(action_log_probs - batch["action_log_probs"])
@@ -317,12 +328,14 @@ class PPOTrainerV0(BaseTrainer):
                 num_clipped_epoch[i_epoch] += num_clipped.sum().item()
                 num_samples_epoch[i_epoch] += num_clipped.size(0)
 
+                # 计算总的损失函数
                 total_loss = (
                     value_loss * ppo_cfg.value_loss_coef
                     + action_loss
                     - dist_entropy * ppo_cfg.entropy_coef
                 )
                 total_loss.backward()
+                # total_loss.backward(retain_graph=True)
 
                 if ppo_cfg.max_grad_norm > 0:
                     nn.utils.clip_grad_norm_(
@@ -390,6 +403,27 @@ class PPOTrainerV0(BaseTrainer):
         logger.info(
             "  ".join("{}: {:.3f}".format(k, v) for k, v in metrics.items()),
         )
+        # 直接打印
+        print("===================================================================================")
+        print(
+            "update: {}\tframes当前训练轮数: {}\tfps: {:.3f}\tpercent: {:.2f}%".format(
+                self.num_updates_done,
+                self.num_steps_done,
+                self.num_steps_done / wall_time,
+                self.percent_done() * 100,
+            )
+        )
+        print(
+            "\t".join(
+                "{}: {:.3f}s".format(k, v)
+                for k, v in self.timer.elapsed_times.items()
+            )
+        )
+        print(
+            "  ".join("{}: {:.3f}".format(k, v) for k, v in metrics.items()),
+        )
+        print("===================================================================================")
+
 
     def summarize(self, losses: Dict[str, float], metrics: Dict[str, float]):
         """Summarize scalars in tensorboard."""
@@ -432,6 +466,7 @@ class PPOTrainerV0(BaseTrainer):
         if self.config.NUM_CHECKPOINTS == -1:
             ckpt_freq = self.config.CHECKPOINT_INTERVAL
         else:
+            # 1e8 / 10
             ckpt_freq = (
                 self.config.TOTAL_NUM_STEPS // self.config.NUM_CHECKPOINTS
             )
@@ -470,10 +505,15 @@ class PPOTrainerV0(BaseTrainer):
             f"Saved checkpoint to {ckpt_path} at {self.num_steps_done}th step"
         )
 
+    """这一步的作用是进行恢复的"""
     def resume(self):
         if not self.config.CHECKPOINT_FOLDER:
             return
         ckpt_path = get_latest_checkpoint(self.config.CHECKPOINT_FOLDER, False)
+        print("ckpt_path=")
+        print(ckpt_path)
+        ckpt_path = None
+
         if ckpt_path is None:
             return
         assert os.path.isfile(ckpt_path), ckpt_path
@@ -520,6 +560,8 @@ class PPOTrainerV0(BaseTrainer):
         policy_cfg = config.RL.POLICY
         # policy = baseline_registry.get_policy(policy_cfg.name)
         policy = mm_registry.get_policy(policy_cfg.name)
+
+        # 这里可以查看观测空间和动作空间
         self.actor_critic: ActorCritic = policy.from_config(
             policy_cfg, self.obs_space, self.action_space
         )
@@ -532,6 +574,8 @@ class PPOTrainerV0(BaseTrainer):
 
         ckpt_path = self.config.RL.POLICY.get("pretrained_weights", None)
         if ckpt_path:
+            print("ckpt_path=")
+            print(ckpt_path)
             assert os.path.isfile(ckpt_path), ckpt_path
             ckpt_dict = torch.load(ckpt_path, map_location="cpu")
             logger.info("Load checkpoint from {}".format(ckpt_path))
@@ -757,6 +801,7 @@ class PPOTrainerV0(BaseTrainer):
 
             # step_action = {"action": actions[0].cpu().numpy()}
             step_action = actions[0].cpu().numpy()
+            # 获取环境的参数，执行动作
             obs, reward, done, info = env.step(step_action)
             current_episode_reward += reward
             metrics = self._extract_scalars_from_info(info)
@@ -895,6 +940,7 @@ class PPOTrainerV0(BaseTrainer):
             current_episodes = self.envs.current_episodes()
             with torch.no_grad():
                 step_batch = dict(observations=batch, **buffer)
+                # 执行动作
                 outputs_batch = self.actor_critic.act(
                     step_batch, deterministic=config.EVAL.DETERMINISTIC_ACTION
                 )

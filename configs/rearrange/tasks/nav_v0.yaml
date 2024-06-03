@@ -1,10 +1,12 @@
 __BASE__: "{fileDirname}/base.yaml"
 
 ENVIRONMENT:
-  MAX_EPISODE_STEPS: 500
+  # 指定最大训练轮数
+  MAX_EPISODE_STEPS: 200
 
 TASK:
   TYPE: RearrangeNavTask-v0
+  # 其中SUB_TASKS和FRIDGE_INIT_RANGE和DRAWER_INIT_RANGE都位于nav_task.py中；
   SUB_TASKS:
     - "pick"
     - "place"
@@ -14,28 +16,30 @@ TASK:
   DRAWER_INIT_RANGE: [0.4, 0.5]
 
   POSSIBLE_ACTIONS:
-    - BaseVelAction
-    - BaseDiscVelAction
+    - BaseVelAction # 位于actions.py中
+    - BaseDiscVelAction # 位于actions.py中
     - BaseVelAction2
 
+  # 定义用到环境传感器，而非robot自身传感器
+  # 是机器人在世界坐标系下的位置
   SENSORS:
-    - NavGoalSensor
+    - NavGoalSensor # 位于nav_to_obj_sensors.py中
 
   MEASUREMENTS:
-    - GeoDistanceToNavGoal
-    - AngDistanceToNavGoal
-    - RearrangeNavSuccess
-    - RearrangeNavReward
+    - GeoDistanceToNavGoal # 位于nav_sernsors.py中
+    - AngDistanceToNavGoal # 位于nav_sernsors.py中
+    - RearrangeNavSuccess # 位于nav_sernsors.py中
+    - RearrangeNavReward # 位于nav_sernsors.py中
   GeoDistanceToNavGoal:
-    TYPE: GeoDistanceToNavGoal
+    TYPE: GeoDistanceToNavGoal # 位于nav_sernsors.py中
   AngDistanceToNavGoal:
-    TYPE: AngDistanceToNavGoal
+    TYPE: AngDistanceToNavGoal # 位于nav_sernsors.py中
   RearrangeNavSuccess:
-    TYPE: RearrangeNavSuccess
+    TYPE: RearrangeNavSuccess # 位于nav_sernsors.py中
     GEO_THRESHOLD: 0.3
     ANG_THRESHOLD: 0.5
   RearrangeNavReward:
-    TYPE: RearrangeNavReward
+    TYPE: RearrangeNavReward # 位于nav_sernsors.py中
     GEO_DIST_REWARD: 1.0
     ANG_DIST_REWARD: 0.25
     ANG_REWARD_THRESH: 0.5

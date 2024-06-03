@@ -3,11 +3,11 @@ BASE_RUN_DIR: "data/results/rearrange/skills/tidy_house/{fileName}"
 
 TRAINER_NAME: "ppo-v0"
 ENV_NAME: "RearrangeRLEnv-v0"
-NUM_ENVIRONMENTS: 64
+NUM_ENVIRONMENTS: 10
 TOTAL_NUM_STEPS: 1e8
 
 LOG_INTERVAL: 10
-NUM_CHECKPOINTS: 10
+NUM_CHECKPOINTS: -1  # 10
 CHECKPOINT_INTERVAL: 150 # about 1M steps
 SPLIT_DATASET: True # save memory
 

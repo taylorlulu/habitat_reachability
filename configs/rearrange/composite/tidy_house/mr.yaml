@@ -21,6 +21,8 @@ SOLUTION:
     NavRLSkill:
       TYPE: NavRLSkill
       ACTION: BaseDiscVelAction
-      CKPT_PATH: "data/results/rearrange/skills/tidy_house/nav_v1_disc_SCR/seed=100/checkpoints/ckpt.10.pth"
+#      CKPT_PATH: "data/results/rearrange/skills/tidy_house/nav_v1_disc_SCR/seed=100/checkpoints/ckpt.10.pth"
+#      CKPT_PATH: "/home/lu/Desktop/embodied_ai/data/results/rearrange/skills/tidy_house/checkpoints/nav_v2/ckpt_pre.pth"
+      CKPT_PATH: "/home/lu/Desktop/embodied_ai/data/results/rearrange/skills/tidy_house/checkpoints/nav_v3/ckpt.-1.pth"
       TIMEOUT: 500
       END_TYPE: "call_stop"

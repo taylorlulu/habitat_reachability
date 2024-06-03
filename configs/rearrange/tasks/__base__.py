@@ -121,6 +121,21 @@ _C.SIMULATOR.DEPTH_SENSOR.TYPE = "HabitatSimDepthSensor"
 _C.SIMULATOR.SEMANTIC_SENSOR = CAMERA_SIM_SENSOR.clone()
 _C.SIMULATOR.SEMANTIC_SENSOR.TYPE = "HabitatSimSemanticSensor"
 # -----------------------------------------------------------------------------
+# 3rd RGB SENSOR
+# -----------------------------------------------------------------------------
+_C.SIMULATOR.THIRD_RGB_SENSOR = _C.SIMULATOR.RGB_SENSOR.clone()
+_C.SIMULATOR.THIRD_RGB_SENSOR.UUID = "robot_third_rgb"
+# -----------------------------------------------------------------------------
+# 3rd DEPTH SENSOR
+# -----------------------------------------------------------------------------
+_C.SIMULATOR.THIRD_DEPTH_SENSOR = _C.SIMULATOR.DEPTH_SENSOR.clone()
+_C.SIMULATOR.THIRD_DEPTH_SENSOR.UUID = "robot_third_depth"
+# -----------------------------------------------------------------------------
+# 3rd SEMANTIC SENSOR
+# -----------------------------------------------------------------------------
+_C.SIMULATOR.THIRD_SEMANTIC_SENSOR = _C.SIMULATOR.SEMANTIC_SENSOR.clone()
+_C.SIMULATOR.THIRD_SEMANTIC_SENSOR.UUID = "robot_third_semantic"
+# -----------------------------------------------------------------------------
 # ROBOT HEAD RGB SENSOR
 # -----------------------------------------------------------------------------
 _C.SIMULATOR.HEAD_RGB_SENSOR = _C.SIMULATOR.RGB_SENSOR.clone()
@@ -150,21 +165,6 @@ _C.SIMULATOR.ARM_DEPTH_SENSOR.UUID = "robot_arm_depth"
 # -----------------------------------------------------------------------------
 _C.SIMULATOR.ARM_SEMANTIC_SENSOR = _C.SIMULATOR.SEMANTIC_SENSOR.clone()
 _C.SIMULATOR.ARM_SEMANTIC_SENSOR.UUID = "robot_arm_semantic"
-# -----------------------------------------------------------------------------
-# 3rd RGB SENSOR
-# -----------------------------------------------------------------------------
-_C.SIMULATOR.THIRD_RGB_SENSOR = _C.SIMULATOR.RGB_SENSOR.clone()
-_C.SIMULATOR.THIRD_RGB_SENSOR.UUID = "robot_third_rgb"
-# -----------------------------------------------------------------------------
-# 3rd DEPTH SENSOR
-# -----------------------------------------------------------------------------
-_C.SIMULATOR.THIRD_DEPTH_SENSOR = _C.SIMULATOR.DEPTH_SENSOR.clone()
-_C.SIMULATOR.THIRD_DEPTH_SENSOR.UUID = "robot_third_depth"
-# -----------------------------------------------------------------------------
-# 3rd SEMANTIC SENSOR
-# -----------------------------------------------------------------------------
-_C.SIMULATOR.THIRD_SEMANTIC_SENSOR = _C.SIMULATOR.SEMANTIC_SENSOR.clone()
-_C.SIMULATOR.THIRD_SEMANTIC_SENSOR.UUID = "robot_third_semantic"
 
 # -----------------------------------------------------------------------------
 # AGENT

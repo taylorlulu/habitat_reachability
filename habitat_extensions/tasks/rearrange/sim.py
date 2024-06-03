@@ -52,6 +52,9 @@ class MyHabitatSimSemanticSensor(HabitatSimSemanticSensor):
         return obs.astype(np.uint8, copy=False)
 
 
+"""
+该类继承自HabitatSim并在一定程度上进行了封装
+"""
 @registry.register_simulator(name="RearrangeSim-v0")
 class RearrangeSim(HabitatSim):
     robot: FetchRobot
@@ -85,6 +88,7 @@ class RearrangeSim(HabitatSim):
             self.robot = FetchRobot(self)
         else:
             raise NotImplementedError(config.FETCH_ROBOT.TYPE)
+
         self.robot.update_params(config.FETCH_ROBOT.PARAMS)
 
         # NOTE(jigu): hardcode (arm-only) pyrobot
@@ -256,6 +260,7 @@ class RearrangeSim(HabitatSim):
             art_obj = art_obj_mgr.get_object_by_handle(handle)
             print(handle, art_obj, art_obj.object_id)
 
+    # 增加
     def _add_markers(self):
         self.markers = OrderedDict()
         art_obj_mgr = self.get_articulated_object_manager()
@@ -270,6 +275,7 @@ class RearrangeSim(HabitatSim):
         #     marker = Marker(name, art_obj, link_id, params["offset"])
         #     self.markers[name] = marker
 
+        # 这个是冰箱
         fridge_handle = "fridge_:0000"
         art_obj = art_obj_mgr.get_object_by_handle(fridge_handle)
         link_id = art_utils.get_link_id_by_name(art_obj, "top_door")
@@ -278,6 +284,7 @@ class RearrangeSim(HabitatSim):
         )
         self.markers[marker.uuid] = marker
 
+        # 这个是厨房的柜台
         drawer_handle = "kitchen_counter_:0000"
         art_obj = art_obj_mgr.get_object_by_handle(drawer_handle)
         drawer_link_names = [
@@ -296,10 +303,18 @@ class RearrangeSim(HabitatSim):
             self.markers[marker.uuid] = marker
 
     def _add_targets(self):
+        """
+        增加环境中目标物体的部分
+        Returns:
+
+        """
         self.targets = OrderedDict()
+        # 在这部分中获取环境信息
         episode = self.habitat_config.EPISODE
         # handles = sorted(episode["targets"].keys())
         # NOTE(jigu): The order of targets is used in `target_receptacles` and `goal_receptacles`
+
+        # target_receptacles需要从goal_receptacles放置到target_receptacles，所以它们的数目是相等的
         handles = list(episode["targets"].keys())
         for handle in handles:
             T = episode["targets"][handle]
@@ -367,13 +382,14 @@ class RearrangeSim(HabitatSim):
         # # Reset the articulated objects
         # self._set_articulated_objects_from_episode()
 
-        # Reset the robot
+        # Reset the robot，重置机器人位置的代码
         self.robot.reset()
 
         # Place the robot
         # NOTE(jigu): I will set `start_position` out of the room,
         # so that some articulated objects can be initialized in tasks.
         episode = self.habitat_config.EPISODE
+        # 机器人当前位置
         self.robot.base_T = mn_utils.to_Matrix4(
             episode["start_position"], episode["start_rotation"]
         )
@@ -629,27 +645,38 @@ class RearrangeSim(HabitatSim):
                     obj.is_alive,
                 )
             rigid_obj_mgr.remove_object_by_id(obj.object_id)
+        # 相当于是清除了所有的可见物品
         self.viz_objs = OrderedDict()
 
-    def add_viz_obj(
+    # -------------------------------------------------------------------------- #
+    # 可视化部分，将物体加入环境
+    # -------------------------------------------------------------------------- #
+    def add_viz_obj( # 增加可视化的物体
         self,
         position: mn.Vector3,
         scale=mn.Vector3(1, 1, 1),
         rotation: Optional[mn.Quaternion] = None,
         template_name="coord_frame",
     ):
+        # 获取物理对象管理器
         obj_attr_mgr = self.get_object_template_manager()
+        # 获取刚体对象管理器
         rigid_obj_mgr = self.get_rigid_object_manager()
 
         # register a new template for visualization
+        # 第一步，先要获取template
+        # 在这里obj_attr_mgr.get_template_handles(template_name)[0]其实对应的就是'habitat_extensions/assets/objects/primitives/transform_box.object_config.json'
         template = obj_attr_mgr.get_template_by_handle(
             obj_attr_mgr.get_template_handles(template_name)[0]
         )
+        # 第二步，修改scale，即在Isaac-sim中也尝试过的进行缩放
         template.scale = scale
+        # 第三步，进行注册register_template
         template_id = obj_attr_mgr.register_template(
             template, f"viz_{template_name}"
         )
 
+        # 第四步，通过id添加物品
         viz_obj = rigid_obj_mgr.add_object_by_template_id(template_id)
         obj_utils.make_render_only(viz_obj)
         viz_obj.translation = position
@@ -683,6 +710,7 @@ class RearrangeSim(HabitatSim):
             self.visualize_frame(name, marker.transformation, scale=0.15)
 
     def visualize_target(self, index):
+        # TODO:在此函数中可以获得物品的bbox
         tgt_obj, tgt_T = self.get_target(index)
         obj_bb = obj_utils.get_aabb(tgt_obj)
         viz_obj = self.add_viz_obj(
@@ -692,6 +720,7 @@ class RearrangeSim(HabitatSim):
             template_name="transform_box",
         )
         self.viz_objs[f"target.{index}"] = viz_obj
+        return viz_obj
 
     def visualize_region(
         self,
@@ -720,6 +749,181 @@ class RearrangeSim(HabitatSim):
         """
         # self.visualize_frame("ee_frame", self.robot.gripper_T, scale=0.15)
         rendered_frame = super().render(mode=mode)
+        # print(rendered_frame)
         # Remove visualization in case polluate observations
         self._remove_viz_objs()
         return rendered_frame
+
+    def get_color(self, idx):
+        # 可达性：蓝色>绿色>黄色>橘色>红色
+        dark_blue = mn.Color4(0, 1 / 255, 249 / 255, 1)
+        green = mn.Color4(2 / 255, 247 / 255, 2 / 255, 1)
+        yellow = mn.Color4(248 / 255, 250 / 255, 1 / 255, 1)
+        orange = mn.Color4(255 /255, 153 / 255, 51 / 255, 1)
+        ori = mn.Color4(247 / 255, 204 / 255, 239 / 255, 1)
+        red = mn.Color4(247 / 255, 0, 0, 1)
+        if idx == 0:
+            return dark_blue
+        elif idx == 1:
+            return green
+        elif idx == 2:
+            return yellow
+        elif idx == 3:
+            return orange
+        elif idx == 4:
+            return red
+
+    """JL修改，用于显示机器人周围的可达性区域"""
+    def show_reachability(self, q_values, round_loc, resolution_dis=0.2, resolution_ang=10):
+        debug_line_render = self.get_debug_line_render()
+        debug_line_render.set_line_width(1)
+
+        reshaped_q_values = q_values.reshape((-1, 18))
+        # 沿着第二个轴计算平均值
+        average_values = np.mean(reshaped_q_values, axis=1)
+
+        # average_values = q_values.copy()
+
+        _len = len(average_values)
+
+        # print("_len=%d"%(_len))
+
+        # 将q值转为颜色
+        min_val = np.min(average_values)
+        max_val = np.max(average_values)
+        normalized_q = (average_values - min_val) / (max_val - min_val)
+
+        """这是一段调试q值大小的代码"""
+        # 靠近的过程中正的值也大负的值也大
+        avg_val = np.average(average_values)
+        print("q值中：min_val=%s, max_val=%s, avg_val=%s" % (min_val, max_val, avg_val))
+        """这是一段调试q值大小的代码"""
+
+        colors = np.zeros([_len])
+        for i in range(_len):
+            if normalized_q[i] > 0.85:
+                colors[i] = 0
+            elif normalized_q[i] > 0.8:
+                colors[i] = 1
+            elif normalized_q[i] > 0.7:
+                colors[i] = 2
+            elif normalized_q[i] > 0.6:
+                colors[i] = 3
+            else:
+                colors[i] = 4
+
+        # TODO：索引测试正确，见索引值横向连接测试通过.png和索引值涟漪状连接测试通过.png
+        # 采用画线的方式
+        # 画线包括两部分：从圆心向外画线，在Jupyter文件中从测试过索引值的正确性
+        start = 0
+        line_len = int((1.3 - 0.3) / resolution_dis)
+        # self.console_logger.info("line_len=%d"%(line_len))
+        for phi_cnt in range(0, 360, resolution_ang):
+            for j in range(start, start+line_len-1, 1):
+                cur_line = round_loc[j, :]
+                cur_color = self.get_color(colors[j])
+                next_line = round_loc[j+1, :]
+                line_list = []
+                line_list.append(mn.Vector3(cur_line[0], cur_line[1], cur_line[2]))
+                line_list.append(mn.Vector3(next_line[0], next_line[1], next_line[2]))
+                debug_line_render.draw_path_with_endpoint_circles(
+                    line_list,
+                    0.02,
+                    cur_color,
+                )
+                # debug_line_render.draw_transformed_line(
+                #     mn.Vector3(cur_line[0], cur_line[1], cur_line[2]),
+                #     mn.Vector3(next_line[0], next_line[1], next_line[2]),
+                #     cur_color,
+                #     cur_color,
+                # )
+
+            start += line_len
+
+        # # 一圈一圈画线如同涟漪一般
+        start = 0
+        round_len = int((360 - 0) / resolution_ang)
+        for r in np.arange(0.3, 1.3, resolution_dis):
+            for j in range(start, _len - line_len, line_len):
+                cur_line = round_loc[j, :]
+                cur_color = self.get_color(colors[j])
+                next_line = round_loc[j+line_len, :]
+                line_list = []
+                line_list.append(mn.Vector3(cur_line[0], cur_line[1], cur_line[2]))
+                line_list.append(mn.Vector3(next_line[0], next_line[1], next_line[2]))
+                debug_line_render.draw_path_with_endpoint_circles(
+                    line_list,
+                    0.02,
+                    cur_color,
+                )
+
+            cur_line = round_loc[j+line_len, :]
+            cur_color = self.get_color(colors[j+line_len])
+            next_line = round_loc[start, :]
+            line_list = []
+            line_list.append(mn.Vector3(cur_line[0], cur_line[1], cur_line[2]))
+            line_list.append(mn.Vector3(next_line[0], next_line[1], next_line[2]))
+            debug_line_render.draw_path_with_endpoint_circles(
+                line_list,
+                0.02,
+                cur_color,
+            )
+
+            # print("横向cur_color[%d]=%s" % (j+line_len, cur_color))
+                # debug_line_render.draw_transformed_line(
+                #     mn.Vector3(cur_line[0], cur_line[1], cur_line[2]),
+                #     mn.Vector3(next_line[0], next_line[1], next_line[2]),
+                #     cur_color,
+                #     cur_color,
+                # )
+            start += 1
+
+
+    """JL修改：用于显示桌子周围的可达性"""
+    def show_surrounding_reachablity(self, q_val, surround_loc, size=8):
+        debug_line_render = self.get_debug_line_render()
+        debug_line_render.push_transform(self.robot.base_T)
+        debug_line_render.set_line_width(1)
+
+        _len = len(q_val)
+
+        # # # 将q值转为颜色
+        # min_val = np.min(q_val)
+        # max_val = np.max(q_val)
+        # normalized_q = (q_val - min_val) / (max_val - min_val)
+        #
+        # """这是一段调试q值大小的代码"""
+        # # 靠近的过程中正的值也大负的值也大
+        # avg_val = np.average(q_val)
+        # print("q值中：min_val=%s, max_val=%s, avg_val=%s" % (min_val, max_val, avg_val))
+        # """这是一段调试q值大小的代码"""
+
+        normalized_q = q_val
+
+        colors = np.zeros([_len])
+        for i in range(_len):
+            if normalized_q[i] > 0.8:
+                colors[i] = 0
+            elif normalized_q[i] > 0.7:
+                colors[i] = 1
+            elif normalized_q[i] > 0.5:
+                colors[i] = 2
+            elif normalized_q[i] > 0.3:
+                colors[i] = 3
+            else:
+                colors[i] = 4
+
+        for i in range(_len-1):
+            cur_line = surround_loc[i, :]
+            cur_color = self.get_color(colors[i])
+            next_line = surround_loc[i+1, :]
+            line_list = []
+            line_list.append(mn.Vector3(cur_line[0], cur_line[1], cur_line[2]))
+            line_list.append(mn.Vector3(next_line[0], next_line[1], next_line[2]))
+            debug_line_render.draw_path_with_endpoint_circles(
+                line_list,
+                0.02,
+                cur_color,
+            )
+
+        debug_line_render.pop_transform()

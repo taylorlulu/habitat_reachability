@@ -18,7 +18,8 @@ import habitat_extensions.tasks.rearrange
 import mobile_manipulation.ppo
 from mobile_manipulation.config import get_config
 from mobile_manipulation.utils.common import get_run_name, warn
-
+from habitat_extensions.utils.net_utils import CriticNetwork, ActorNetwork, CriticNetworkGraph, ActorNetworkGraph
+from habitat_extensions.utils.net_utils import initial_agent
 
 def main():
     parser = argparse.ArgumentParser()
@@ -49,7 +50,7 @@ def main():
     parser.add_argument(
         "--no-video", action="store_true", help="disable video"
     )
-
+    initial_agent()
     args = parser.parse_args()
     config = get_config(args.config_path, args.opts)
     preprocess_config(config, args)
@@ -132,10 +133,12 @@ def execute_exp(config: Config, run_type: str) -> None:
     if config.FORCE_TORCH_SINGLE_THREADED and torch.cuda.is_available():
         torch.set_num_threads(1)
 
+    # 配置训练环境
     trainer_cls = baseline_registry.get_trainer(config.TRAINER_NAME)
     assert trainer_cls is not None, f"{config.TRAINER_NAME} is not supported"
     trainer = trainer_cls(config)
 
+    # 选择运行模式
     if run_type == "train":
         trainer.train()
     elif run_type == "eval":

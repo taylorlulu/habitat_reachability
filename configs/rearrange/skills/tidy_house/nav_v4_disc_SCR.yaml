@@ -1,0 +1,26 @@
+__BASE__: "{fileDirname}/nav_v0_disc_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/nav_v4.yaml"
+
+# 这个版本是将(x, y)信息加入奖励函数，且加入传感器信息
+RL:
+  # 定义RL的采用的奖励函数
+  REWARD_MEASURES:
+    - "rearrange_nav_rewardv3"
+    - "force_penalty"
+
+  POLICY:
+    name: CRPolicy
+    actor_type: "categorical"
+    CRNet:
+      rgb_uuids: [ ]
+      # 真正的传感器输入在这部分
+      depth_uuids:
+        - "robot_head_depth"
+      state_uuids:
+        - "nav_goal_at_base"
+      reachability_uuids:
+        - "reachability_at_base"
+      hidden_size: 512
+      state_hidden_sizes: [ ]
+      reachability_hidden_sizes: [5, 1]
+      rnn_hidden_size: 512

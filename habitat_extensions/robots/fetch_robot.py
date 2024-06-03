@@ -20,15 +20,21 @@ class FetchRobot(Robot):
             params = self.get_default_params()
         super().__init__(sim, params)
 
+    """
+    获取机器人的默认参数
+    """
     @classmethod
     def get_default_params(cls) -> RobotParams:
         params = RobotParams(
-            urdf_path="data/robots/hab_fetch/robots/hab_fetch.urdf",
+            urdf_path="data/robots/hab_fetch/robots/hab_fetch.urdf",  # 读取的是机器人的urdf文件
+            # 获取robot的关节索引值
             arm_joints=[15, 16, 17, 18, 19, 20, 21],
             gripper_joints=[23, 24],
             # arm_init_params=[-0.45, -1.08, 0.1, 0.935, -0.001, 1.573, 0.005],
-            arm_init_params=[-0.268, -1.133, 0.367, 1.081, 0.06, 2.002, 0.067],
-            gripper_init_params=[0.0, 0.0],
+            # 获取机械臂的初始位姿参数
+            arm_init_params=[-0.268, -1.133, 0.367, 1.081, 0.06, 2.002, 0.067],  # 初始机械臂的位姿
+            # 初始的夹爪位置默认是关闭的
+            gripper_init_params=[0.04, 0.04],  # 初始的夹爪
             ee_link=22,
             ee_offset=mn.Vector3(0.08, 0.0, 0.0),
             # joint_stiffness=0.3,
@@ -37,6 +43,7 @@ class FetchRobot(Robot):
             arm_pos_gain=0.3,
             arm_vel_gain=0.3,
             arm_max_impulse=10.0,  # can not be too large when using pos gain
+            # 设置相机位置
             cameras={
                 "robot_arm_": RobotCameraParams(
                     cam_pos=mn.Vector3(0, 0, 0.1),
@@ -93,14 +100,16 @@ class FetchRobot(Robot):
         self.set_joint_pos(self.params.extra["head_pan_joint"], 0.0)
         self.set_joint_pos(self.params.extra["head_tilt_joint"], np.pi / 2)
 
+    # 设置当前机器人的位姿
     def step(self):
         super().step()
 
         # Set some joint positions every step, following p-viz-plan
-        self.set_joint_pos(self.params.extra["torso_lift_joint"], 0.15)
-        self.set_joint_pos(self.params.extra["head_pan_joint"], 0.0)
-        self.set_joint_pos(self.params.extra["head_tilt_joint"], np.pi / 2)
+        self.set_joint_pos(self.params.extra["torso_lift_joint"], 0.15)  # 设置机器人的躯干升降
+        self.set_joint_pos(self.params.extra["head_pan_joint"], 0.0)  # 设置机器人的头部旋转
+        self.set_joint_pos(self.params.extra["head_tilt_joint"], np.pi / 2)  # 设置机器人的头部俯仰角
 
+    # 进行机器人的位姿变换，将坐标转换到世界坐标系或其他坐标系下
     def transform(self, x: np.ndarray, T: Union[str, np.ndarray]):
         """Transform point(s) (from habitat world frame) to specified frame."""
         if isinstance(T, str):
@@ -123,8 +132,10 @@ class FetchRobot(Robot):
         assert T.shape == (4, 4)
         return transform_points(x, T)
 
+    # 打开夹爪
     def open_gripper(self):
         self.gripper_motor_pos = [0.04, 0.04]
 
+    # 关闭夹爪
     def close_gripper(self):
         self.gripper_motor_pos = [0.0, 0.0]

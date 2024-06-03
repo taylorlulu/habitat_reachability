@@ -1,0 +1,9 @@
+__BASE__: "{fileDirname}/nav_v0_disc_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/nav_v3.yaml"
+
+# 这个版本是将(x, y)信息加入奖励函数
+RL:
+  # 定义RL的采用的奖励函数
+  REWARD_MEASURES:
+    - "rearrange_nav_rewardv3"
+    - "force_penalty"

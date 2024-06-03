@@ -23,12 +23,15 @@ def compute_start_state(sim: RearrangeSim, tgt_pos, init_start_pos=None):
     The start position is the nearest navigible point to the target,
     and the start orientation is towards the target.
     """
+    # 如果初始点为0
     if init_start_pos is None:
         start_pos = sim.pathfinder.snap_point(tgt_pos)
     else:
         start_pos = sim.pathfinder.snap_point(init_start_pos)
     assert not np.isnan(start_pos).any(), tgt_pos
+    # 目标物品位置-当前物品位置
     offset = tgt_pos - np.array(start_pos)
+    # 绘制初始点
     start_ori = np.arctan2(-offset[2], offset[0])
     return start_pos, start_ori
 
@@ -307,19 +310,26 @@ def get_navigable_positions(
 ):
     pathfinder = sim.pathfinder
     # 0-dim is z-axis, and 1-dim is x-axis
+    # 获取从上至下全局视角下的地图
     top_down_map = pathfinder.get_topdown_view(
         meters_per_pixel=meters_per_pixel,
         height=height,
     ).astype(np.uint8)
+
+    # 通常用于将非连续存储的数组转换为连续存储的数组
     top_down_map = np.ascontiguousarray(top_down_map)
 
     # Get grid info
+    # 获取分辨率信息
     grid_resolution = top_down_map.shape
+    # 获取当前的lower_bound和upper_bound
     lower_bound, upper_bound = pathfinder.get_bounds()
+    # 获取当前图的grid_size
     grid_size = (
         abs(upper_bound[2] - lower_bound[2]) / grid_resolution[0],
         abs(upper_bound[0] - lower_bound[0]) / grid_resolution[1],
     )
+    # 获取当前图的起点
     grid_origin = [lower_bound[2], lower_bound[0]]
 
     # Get navigable positions
@@ -336,6 +346,7 @@ def visualize_positions_on_map(
 ):
     pathfinder = sim.pathfinder
     # 0-dim is z-axis, and 1-dim is x-axis
+    # 获取从上至下地图，其实top_down_map是一个有[0, 1]两种取值的地图数据
     top_down_map = pathfinder.get_topdown_view(
         meters_per_pixel=meters_per_pixel,
         height=height,
@@ -354,7 +365,9 @@ def visualize_positions_on_map(
     import cv2
     from habitat.utils.visualizations import maps
 
+    # 将xyz转移到地图上
     coords = map_utils.to_grid(xyz[:, [2, 0]], grid_origin, grid_size)
+    # 给top_down_map设置另一种颜色
     for z, x in coords:
         top_down_map[z, x] = 4
     cv2.imshow("map", maps.colorize_topdown_map(top_down_map))
@@ -388,24 +401,35 @@ def compute_start_positions_from_map_v1(
     debug=False,
 ):
     """Get candidates for start position (x, y, z) given the top-down map."""
+    # 获取当前环境中的所有可导航区域
     xyz = get_navigable_positions(sim, height, meters_per_pixel)
+    # 将可导航区域转换到机器人坐标系下
     xyz_local = transform_points(xyz, np.array(T.inverted()))
+    # 值去x和z的局部坐标系下的坐标
     xz_local = xyz_local[:, [0, 2]]
+    # 形成mask
     mask = np.ones([xyz.shape[0]], dtype=bool)
 
+    # 如果存在到达的区域，只保留这部分区域
     if region is not None:
+        # 将在这个区域范围的xz做成掩码
         mask2 = np.logical_and(xz_local >= region.min, xz_local <= region.max)
         mask2 = np.all(mask2, axis=-1)
         mask = np.logical_and(mask, mask2)
 
+    # 如果存在半径范围
     if radius is not None:
         mask2 = np.linalg.norm(xz_local, axis=-1) <= radius
         mask = np.logical_and(mask, mask2)
 
     xyz = xyz[mask]
     xyz = filter_by_island_radius(sim, xyz, threshold=meters_per_pixel + 0.01)
+
+    # 将结果显示在图上
     if debug:
         visualize_positions_on_map(xyz, sim, height, meters_per_pixel)
+
+    # 获取可导航区域
     return xyz
 
 
@@ -430,8 +454,11 @@ def compute_region_goals_v1(
         mask = np.logical_and(mask, mask2)
 
     while radius <= max_radius:
+        # 获取在半径范围内的mask3
         mask3 = np.linalg.norm(xz_local, axis=-1) <= radius
+        # 如果获取的xyz2范围内没有点
         xyz2 = xyz[np.logical_and(mask, mask3)]
+        # 如果点的范围过少则扩大范围
         if len(xyz2) == 0:
             radius += delta_size
             # print("search for a larger radius", radius)

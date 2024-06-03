@@ -69,7 +69,7 @@ class Robot:
         self.cameras = {}
 
     def reconfigure(self):
-        """Initialize the robot (load urdf, initialize motors)."""
+        """Initialize the robot (load urdf, initialize motors).初始化模型，主要是robot的arm部分"""
         art_obj_mgr = self.sim.get_articulated_object_manager()
 
         # remove the old one if exists
@@ -205,6 +205,29 @@ class Robot:
             "motors": self._get_joint_motors(),
         }
         return state
+
+    def set_robot_pos(self, position=None, orientation=None):
+        if position is None:
+            self.sim_obj.transformation = mn.Matrix4((
+                (np.cos(orientation), 0, -np.sin(orientation), 0),
+                (0,                   1,                    0, 0),
+                (np.sin(orientation), 0,  np.cos(orientation), 0),
+                (self.sim_obj.transformation[3, 0], self.sim_obj.transformation[3, 1], self.sim_obj.transformation[3, 2], 1)
+            ))
+        elif orientation is None:
+            self.sim_obj.transformation = mn.Matrix4((
+                (self.sim_obj.transformation[0, 0], 0, self.sim_obj.transformation[0, 2], 0),
+                (0,                                 1,                                 0, 0),
+                (self.sim_obj.transformation[2, 0], 0, self.sim_obj.transformation[2][2], 0),
+                (position[0],              position[1],                      position[2], 1)
+            ))
+        else:
+            self.sim_obj.transformation = mn.Matrix4((
+                (np.cos(orientation), 0, -np.sin(orientation), 0),
+                (0,                   1,                    0, 0),
+                (np.sin(orientation), 0,  np.cos(orientation), 0),
+                (position[0], position[1],        position[2], 1)
+            ))
 
     def set_state(self, state: dict):
         self.sim_obj.clear_joint_states()

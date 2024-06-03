@@ -42,34 +42,43 @@ TASK:
     - RearrangePickReward
     
   GripperToObjectDistance:
+    # 位于habitat_extensions/tasks/rearrange/sensors.py，计算当前夹爪到达目标物体的距离
     TYPE: GripperToObjectDistance
   GripperToRestingDistance:
+    # 位于habitat_extensions/tasks/rearrange/sensors.py，计算当前夹爪到达目标物体的距离
     TYPE: GripperToRestingDistance
   GripperStatus:
+    # 当前夹爪的状态
     TYPE: GripperStatus
   RobotForce:
+    # 位于habitat_extensions/tasks/rearrange/sensors.py，计算当前夹爪到达目标物体的距离
     TYPE: RobotForce
     MIN_DELTA_FORCE: 20.0
     INCLUDE_OBJ_COLLISIONS: True
   ForcePenalty:
+    # 位于habitat_extensions/tasks/rearrange/sensors.py，计算当前夹爪到达目标物体的距离
     TYPE: ForcePenalty
     FORCE_PENALTY: 0.001
     MAX_FORCE_PENALTY: 0.2
     MAX_ACCUM_FORCE: 5000.0
     MAX_ACCUM_FORCE_PENALTY: 1.0
   InvalidGrasp:
+    # 位于habitat_extensions/tasks/rearrange/sensors.py，
     TYPE: InvalidGrasp
   InvalidGraspPenalty:
+    # 位于habitat_extensions/tasks/rearrange/sensors.py
     TYPE: InvalidGraspPenalty
     PENALTY: 1.0
     END_EPISODE: True
-  RearrangePickSuccess:
+  RearrangePickSuccess: # 设置到达的阈值为5cm
+    # 位于habitat_extensions/tasks/rearrange/sub_tasks/pick_sensors.py
     TYPE: RearrangePickSuccess
     THRESHOLD: 0.05
-  RearrangePickReward:
+  RearrangePickReward: # 奖励函数
+    # 位于habitat_extensions/tasks/rearrange/sub_tasks/pick_sensors.py
     TYPE: RearrangePickReward
-    DIST_REWARD: 4.0
-    USE_DIFF: True
-    PICK_REWARD: 1.0
-    PICK_PENALTY: 1.0
+    DIST_REWARD: 4.0  # 即论文里对应的4\Delta_{ee}^o \Roman{2}_{!holding}，以及4\Delta_{ee}^r \Roman{2}_{holding}
+    USE_DIFF: True  #
+    PICK_REWARD: 1.0  # 即论文里对应的\Roman{2}
+    PICK_PENALTY: 1.0  # 即论文中的-\Roman{2}_{wrong}
     DROP_PENALTY: 1.0

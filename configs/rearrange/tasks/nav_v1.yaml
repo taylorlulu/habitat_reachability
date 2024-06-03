@@ -3,11 +3,14 @@ __BASE__: "{fileDirname}/nav_v0.yaml"
 TASK:
   TYPE: RearrangeNavTask-v1
 
+  # 定义所有用到的衡量指标
+  # 不一定其中的所有部分都用到RL的奖励函数中去
+  # 这里的nav_v1和nav_v0是一个继承关系
   MEASUREMENTS:
     - GeoDistanceToNavGoals
     - AngDistanceToGoal
     - RearrangeNavSuccess
-    - RearrangeNavReward
+    - RearrangeNavRewardV1
     - RobotForce
     - ForcePenalty
 
@@ -22,8 +25,8 @@ TASK:
     TYPE: RearrangeNavSuccess
     GEO_THRESHOLD: 0.1
     ANG_THRESHOLD: 0.25
-  RearrangeNavReward:
-    TYPE: RearrangeNavReward
+  RearrangeNavRewardV1:
+    TYPE: RearrangeNavRewardV1
     GEO_DIST_REWARD: 1.0
     ANG_DIST_REWARD: 0.0
     ANG_REWARD_THRESH: -1.0

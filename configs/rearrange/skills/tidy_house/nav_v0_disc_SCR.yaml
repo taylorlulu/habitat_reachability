@@ -22,12 +22,16 @@ RL:
   POLICY:
     name: CRPolicy
     actor_type: "categorical"
+    pretrained_weights: "data/results/rearrange/skills/tidy_house/nav_v2_disc_SCR/checkpoints/ckpt_pre.pth"
     CRNet:
       rgb_uuids: []
+      # 真正的传感器输入在这部分
       depth_uuids:
         - "robot_head_depth"
       state_uuids:
         - "nav_goal_at_base"
+#      reachability_uuids:
+#        - "reachability_at_base"
       hidden_size: 512
       state_hidden_sizes: []
       rnn_hidden_size: 512

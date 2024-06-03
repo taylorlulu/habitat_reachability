@@ -1,0 +1,16 @@
+*.DS_store
+build/
+dist/
+examples/habitat/Replica-Dataset 
+examples/habitat/data
+mushroom_rl.egg-info/
+.idea/
+*.pyc
+*.pyd
+*.xml
+logs/
+*.h5
+.pytest_cache
+.coverage*
+*.c
+*.so

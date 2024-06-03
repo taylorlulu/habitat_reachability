@@ -119,7 +119,9 @@ def construct_envs(
 
     # Vectorize environments
     debug = os.environ.get("HABITAT_ENV_DEBUG", 0)
-    vec_env_cls = ThreadedVectorEnv if debug else VectorEnv
+    # JL修改因为默认debug==0所以取VectorEnv，但是其不好用会报Env的错误
+    #vec_env_cls = ThreadedVectorEnv if debug else VectorEnv
+    vec_env_cls = ThreadedVectorEnv
     envs = vec_env_cls(
         make_env_fn=make_env_fn,
         env_fn_args=tuple(zip(configs, env_classes, [wrappers] * num_envs)),

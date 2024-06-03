@@ -38,7 +38,9 @@ def to_grid(
         coords: [N, D]
     """
     points = np.array(points)
+    # 将点转移到最近的地图上，相当于是(当前点坐标-原点坐标)/分辨率
     coords = (points - origin) / cell_size
+    # 经过四舍五入转换到地图上
     if round:
         coords = np.round(coords).astype(int)
     else:

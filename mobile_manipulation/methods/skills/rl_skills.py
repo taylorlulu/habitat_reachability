@@ -25,7 +25,7 @@ class RLSkill(Skill):
         self._init_policy(self._config.CKPT_PATH, self.skill_index)
 
     def _init_policy(self, ckpt_path: str, skill_idx: str = ""):
-        ckpt_dict = torch.load(ckpt_path, map_location="cpu")
+        ckpt_dict = torch.load(ckpt_path, map_location="cpu")  # 从指定路径中加载PyTorch模型的检查点
         print(f"Loaded checkpoint from {ckpt_path}")
 
         ckpt_config = ckpt_dict["config"]
